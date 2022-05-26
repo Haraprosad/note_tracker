@@ -12,9 +12,10 @@ if(!$con){
     die("Sorry we failed to connect: ".mysqli_connect_error()); 
 }
 
-//***********For insert and update data ************ */
+//***********For insert and update and delete data ************ */
 $is_submitted = false;
 $is_updated = false;
+$is_deleted = false;
 if($_SERVER['REQUEST_METHOD']=='POST'){
     //***********For update data ************ */
     if(isset($_POST['slNoEdit'])){
@@ -32,7 +33,7 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
         echo "Updation failed: ".mysqli_error($con);
          }
     }
-    else{
+    else if(isset($_POST['title'])){
     //************Update data section end*** */
     //***********For insert data ************ */
     $title = $_POST['title'];
@@ -47,8 +48,22 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
     }
     //***********Insert data end ************ */
 }
+//*********************For delete data -start********* */
+if(isset($_POST['deleteId'])){
+    $sNo = $_POST['deleteId'];
+    $sql = "DELETE FROM notes WHERE `notes`.`slno` = $sNo";
+    $result = mysqli_query($con,$sql);
+    if($result){
+        $is_deleted = true;
+    }
+    else{
+        echo "Deletion failed: ".mysqli_error($con);
+    }
 }
-//****************Insert and update data end************ */
+//*********************For delete data -end*********** */
+}
+//****************Insert and update and delete data end************ */
+
 ?>
 
 
@@ -92,16 +107,43 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
                 <label for="description">Note description</label>
                 <textarea class="form-control" id="descriptionEdit" name="descriptionEdit" rows="3"></textarea>
             </div>
-            <button type="submit" class="btn btn-primary">Update Note</button>
-        </form>
-      </div>
-      <div class="modal-footer">
+        <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+      </div>
+        </form>
       </div>
     </div>
   </div>
 </div>
+
+<!--Delete Modal -start-->
+<!-- Button trigger modal -->
+<!-- Modal --> 
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalTitle" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalTitle">Delete Action</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <form  action="/note_tracker/index.php" method="post">
+          <input type="hidden" id="deleteId" name="deleteId" class="hidden"> 
+          <div>Are you really want to delete this note?</div>
+          <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-danger">Yes</button>
+      </div>
+           </form>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<!--Delete modal -end-->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <a class="navbar-brand" href="#">Note Tracker</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
@@ -133,6 +175,14 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
         $action_name = $is_submitted?"inserted":"updated";
         echo '<div class="alert alert-success alert-dismissible fade show" role="alert">
      <strong>Hurrah!</strong> Data has been '.$action_name.' successfully.
+   <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+    </button>
+        </div>';
+    }
+    if($is_deleted){
+        echo '<div class="alert alert-warning alert-dismissible fade show" role="alert">
+     <strong>Hurrah!</strong> Data has been deleted successfully.
    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
     <span aria-hidden="true">&times;</span>
     </button>
@@ -181,7 +231,8 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
             <th scope='row'>".$sNo."</th>
             <td>".$row['title']."</td>
             <td>".$row['description']."</td>
-            <td><button class='edit btn btn-sm btn-primary' id=".$row['slno'].">Edit</button> <a href='/delete'>Delete</a></td>
+            <td><button class='edit btn btn-sm btn-primary' id=".$row['slno'].">Edit</button> 
+            <button class='delete btn btn-sm btn-danger' id=d".$row['slno'].">Delete</button></td>
             </tr>";
             }
             
@@ -213,6 +264,7 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
     </script>
     <!--Scripting for edit button action-->
     <script>
+        //************Edit related js -start********** */
       edits = document.getElementsByClassName('edit');
       Array.from(edits).forEach((element)=>{
         element.addEventListener("click",(e)=>{
@@ -228,6 +280,24 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
             console.log(e.target.id);
         })
       })
+      //**********Edit related js -end**************** */
+      //***********Delete related js -start************ */
+    deletes = document.getElementsByClassName('delete');
+      Array.from(deletes).forEach((element)=>{
+        element.addEventListener("click",(e)=>{
+            sNo = e.target.id.substr(1,);
+            deleteId.value = sNo;
+            $('#deleteModal').modal('toggle');
+            // if(confirm("Are you sure you want to delete?")){
+            //     console.log("yes");
+            //     $('#deleteModal').modal('toggle');
+            // }
+            // else{
+            //     console.log("No");
+            // }
+        })
+      })
+      //***********Delete related js -end*************** */
     </script>
 </body>
 

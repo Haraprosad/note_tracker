@@ -1,7 +1,8 @@
-<!--Database connection with php-->
+
 
 <!-- INSERT INTO `notes` (`slno`, `title`, `description`, `timestamp`) VALUES ('1', 'description', current_timestamp()); -->
 <?php
+//<!--Database connection with php-->
 $servername = "localhost:3307";
 $username = "root";
 $password = "";
@@ -12,13 +13,14 @@ if(!$con){
 }
 
 //***********For insert data ************ */
+$is_submitted = false;
 if($_SERVER['REQUEST_METHOD']=='POST'){
     $title = $_POST['title'];
     $description = $_POST['description'];
     $sql = "INSERT INTO `notes` (`title`, `description`, `timestamp`) VALUES ('$title', '$description', current_timestamp());";
     $result = mysqli_query($con,$sql);
     if($result){
-        echo "The data is inseted successfully";
+        $is_submitted = true;
     }
     else{
         echo "Insertion failed: ".mysqli_error($con);
@@ -39,6 +41,7 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
         integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+     <link rel="stylesheet" href="//cdn.datatables.net/1.12.0/css/jquery.dataTables.min.css">
 
     <title>Note Tracker</title>
 </head>
@@ -70,6 +73,17 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
         </div>
     </nav>
 
+    <?php 
+    if($is_submitted){
+        echo '<div class="alert alert-success alert-dismissible fade show" role="alert">
+  <strong>Hurrah!</strong> Data has been inserted successfully.
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>';
+    }
+    ?>
+
     <div class="container my-4">
         <h2>Add a note</h2>
         <form action="/note_tracker/index.php" method = "post">
@@ -90,7 +104,7 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
     <div class="container">
 
         <!--Table for data showing-->
-<table class="table">
+<table class="table" id="myTable">
   <thead>
     <tr>
       <th scope="col">Sl.No</th>
@@ -130,6 +144,12 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"
         integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
         crossorigin="anonymous"></script>
+    <script src="//cdn.datatables.net/1.12.0/js/jquery.dataTables.min.js"></script>
+    <script>
+      $(document).ready( function () {
+        $('#myTable').DataTable();
+    } );  
+    </script>
 </body>
 
 </html>
